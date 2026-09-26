@@ -14,7 +14,7 @@ using SQLite.
 
 ## Screenshot
 
-![Financial Summary](APP/screenshots/summary.png)
+![Financial Summary](screenshots/summary.png)
 
 ## Tech Stack
 

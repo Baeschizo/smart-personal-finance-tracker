@@ -1,0 +1,4 @@
+*.db
+transactions.json
+__pycache__/
+.venv/

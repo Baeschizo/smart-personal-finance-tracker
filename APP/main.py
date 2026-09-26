@@ -1,3 +1,4 @@
+from datetime import datetime
 import sqlite3
 def create_connection():
      connection = sqlite3.connect("finance_tracker.db")
@@ -14,24 +15,31 @@ def create_table():
          category TEXT
          )
      """)
+     cursor.execute("PRAGMA table_info(transactions)")
+     columns = [column[1] for column in cursor.fetchall()]
+     if "date" not in columns:
+          cursor.execute("ALTER TABLE transactions ADD COLUMN date TEXT")
+     
      connection.commit()
      connection.close()
 def insert_transacion(description, amount, transaction_type, category):
-     connection = create_connection()
-     cursor = connection.cursor()
-     cursor.execute("""
-        INSERT INTO transactions (description, amount, type, category)
-        VALUES (?, ?, ?, ?)
-    """, (description, amount, transaction_type, category))
+    connection = create_connection()
+    cursor = connection.cursor()
 
-     connection.commit()
-     connection.close()
+    transaction_date = datetime.now().strftime("%Y-%m-%d")
+
+    cursor.execute("""
+        INSERT INTO transactions (description, amount, type, category, date)
+        VALUES (?, ?, ?, ?, ?)
+    """, (description, amount, transaction_type, category, transaction_date))
+    connection.commit()
+    connection.close()
 def get_sqlite_transaction():
      connection = create_connection()
      cursor = connection.cursor()
 
      cursor.execute("""
-        SELECT id, description, amount, type, category
+        SELECT id, description, amount, type, category, date
         FROM transactions
     """)
      rows = cursor.fetchall()
@@ -71,20 +79,26 @@ def view_transaction():
           print("No Transaction Found.")
           return
      for transaction in db_transaction:
-          transaction_id, description, amount, transaction_type, category = transaction
+          transaction_id, description, amount, transaction_type, category, transaction_date = transaction
           print(
                f"{transaction_id}. {description} | "
                f"{transaction_type.title()} | "
                f"₱{amount:,.2f} | "
-               f"{category}"
+               f"{category} | "
+               f"{transaction_date}"
           )
 def financial_summary():
     print("Your Financial Summary")
+    selected_month = input("Enter month (YYYY-MM): ").strip()
     db_transactions = get_sqlite_transaction()
     total_income = 0
     total_expenses = 0
     for transaction in db_transactions:
-        transaction_id, description, amount, transaction_type, category = transaction
+        transaction_id, description, amount, transaction_type, category, trasaction_date = transaction
+        if trasaction_date is None:
+             continue
+        if not trasaction_date.startswith(selected_month):
+             continue
 
         if transaction_type.strip().lower() == "income":
             total_income += amount

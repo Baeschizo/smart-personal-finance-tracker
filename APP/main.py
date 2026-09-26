@@ -90,20 +90,29 @@ def view_transaction():
 def financial_summary():
     print("Your Financial Summary")
     selected_month = input("Enter month (YYYY-MM): ").strip()
+    try:
+         datetime.strptime(selected_month, "%Y-%m")
+    except ValueError:
+         print("Invalid month. Use YYYY-MM, Such as 2026-09.")
+         return
     db_transactions = get_sqlite_transaction()
     total_income = 0
     total_expenses = 0
+    found_transactions = False
     for transaction in db_transactions:
         transaction_id, description, amount, transaction_type, category, trasaction_date = transaction
         if trasaction_date is None:
              continue
         if not trasaction_date.startswith(selected_month):
              continue
-
+        found_transactions = True
         if transaction_type.strip().lower() == "income":
             total_income += amount
         elif transaction_type.strip().lower() == "expenses":
             total_expenses += amount
+    if not found_transactions:
+        print(f"No Transaction found for {selected_month}.")
+        return
     print("-------------------------")
     print(f"Total Income:   ₱{total_income:,.2f}")
     print(f"Total Expenses: ₱{total_expenses:,.2f}")

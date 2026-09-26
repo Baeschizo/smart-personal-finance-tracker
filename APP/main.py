@@ -80,12 +80,18 @@ def view_transaction():
           return
      for transaction in db_transaction:
           transaction_id, description, amount, transaction_type, category, transaction_date = transaction
+          if transaction_date:
+             formatted_date = datetime.strptime(
+                transaction_date, "%Y-%m-%d"
+             ).strftime("%b %d, %Y")
+          else:
+              formatted_date = "Date unavailable"
           print(
                f"{transaction_id}. {description} | "
                f"{transaction_type.title()} | "
                f"₱{amount:,.2f} | "
                f"{category} | "
-               f"{transaction_date}"
+               f"{formatted_date}"
           )
 def financial_summary():
     print("Your Financial Summary")
